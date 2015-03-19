@@ -23,7 +23,6 @@
 #include <asm/cacheflush.h>
 #include <soc/qcom/scm.h>
 #include <linux/powersuspend.h>
-#include <mach/scm.h>
 #include "governor.h"
 
 static DEFINE_SPINLOCK(tz_lock);
@@ -389,7 +388,8 @@ static int tz_suspend(struct devfreq *devfreq)
 
 	suspended = true;
 
-	__secure_tz_entry2(TZ_RESET_ID, 0, 0);
+	unsigned int scm_data[2] = {0, 0};
+	__secure_tz_reset_entry2(scm_data, sizeof(scm_data), priv->is_64);
 
 	priv->bin.total_time = 0;
 	priv->bin.busy_time = 0;
