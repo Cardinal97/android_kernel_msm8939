@@ -1327,7 +1327,11 @@ out:
  * This device is installed and registered as cdev, then interrupt and
  * queue handling is set up
  */
+#if defined(MC_CRYPTO_CLOCK_MANAGEMENT) && defined(MC_USE_DEVICE_TREE)
+static int mobicore_init(void)
+#else
 static int __init mobicore_init(void)
+#endif
 {
 	int ret = 0;
 	dev_set_name(mcd, "mcd");
@@ -1420,7 +1424,11 @@ error:
 /*
  * This function removes this device driver from the Linux device manager .
  */
+#if defined(MC_CRYPTO_CLOCK_MANAGEMENT) && defined(MC_USE_DEVICE_TREE)
+static void mobicore_exit(void)
+#else
 static void __exit mobicore_exit(void)
+#endif
 {
 	MCDRV_DBG_VERBOSE(mcd, "enter");
 #ifdef MC_MEM_TRACES
@@ -1459,6 +1467,65 @@ bool mc_sleep_ready(void)
 }
 
 /* Linux Driver Module Macros */
+
+#if defined(MC_CRYPTO_CLOCK_MANAGEMENT) && defined(MC_USE_DEVICE_TREE)
+static int mcd_probe(struct platform_device *pdev)
+{
+	mcd->of_node = pdev->dev.of_node;
+	mobicore_init();
+	return 0;
+}
+
+static int mcd_remove(struct platform_device *pdev)
+{
+	return 0;
+}
+
+static int mcd_suspend(struct platform_device *pdev, pm_message_t state)
+{
+	return 0;
+}
+
+static int mcd_resume(struct platform_device *pdev)
+{
+	return 0;
+}
+
+static struct of_device_id mcd_match[] = {
+	{
+		.compatible = "qcom,mcd",
+	},
+	{}
+};
+
+static struct platform_driver mc_plat_driver = {
+	.probe = mcd_probe,
+	.remove = mcd_remove,
+	.suspend = mcd_suspend,
+	.resume = mcd_resume,
+	.driver = {
+		.name = "mcd",
+		.owner = THIS_MODULE,
+		.of_match_table = mcd_match,
+	},
+};
+
+static int __init mobicore_register(void)
+{
+	return platform_driver_register(&mc_plat_driver);
+}
+
+static void __exit mobicore_unregister(void)
+{
+	platform_driver_unregister(&mc_plat_driver);
+	mobicore_exit();
+}
+
+module_init(mobicore_register);
+module_exit(mobicore_unregister);
+
+#else
+
 module_init(mobicore_init);
 module_exit(mobicore_exit);
 MODULE_AUTHOR("Giesecke & Devrient GmbH");
