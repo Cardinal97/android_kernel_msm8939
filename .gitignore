@@ -25,6 +25,7 @@
 modules.builtin
 *.elf
 *.bin
+*.img
 *.gz
 *.bz2
 *.lzma
@@ -32,6 +33,7 @@ modules.builtin
 *.lzo
 *.patch
 *.gcno
+*.zip
 
 #
 # Top-level generic files
