@@ -30,9 +30,6 @@
 #include <linux/wakelock.h>
 #include <linux/qpnp/power-on.h>
 #include "yl_pm8916_vbus.h"
-#ifdef CONFIG_THUNDERCHARGE_CONTROL
-#include "thundercharge_control.h"
-#endif
 #ifdef CONFIG_FORCE_FAST_CHARGE
 #define IVBUS_FASTCHG_WARN 1250 /* uA */
 #define USB_FASTCHG_LOAD 1500 /* uA */
@@ -1343,16 +1340,6 @@ static void bq24157_external_power_changed(struct power_supply *psy)
 	if (rc < 0)
 		dev_err(chip->dev,
 			"could not read USB current_max property, rc=%d\n", rc);
-	else
-    {
-#ifdef CONFIG_THUNDERCHARGE_CONTROL
-        if(!((prop.intval / 1000) ==0))
-        {
-        pr_info("Using custom current of %d",custom_current);
-		chip->set_ivbus_max = custom_current;
-        }
-        else
-        chip->set_ivbus_max = 0;
 	else
     {
 #ifdef CONFIG_FORCE_FAST_CHARGE
