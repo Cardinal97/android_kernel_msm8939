@@ -30,6 +30,9 @@
 #include <linux/wakelock.h>
 #include <linux/qpnp/power-on.h>
 #include "yl_pm8916_vbus.h"
+#ifdef CONFIG_FORCE_FAST_CHARGE
+#include <linux/fastchg.h>
+#endif
 
 struct fan5405_chip {
 	struct device         *dev;
@@ -1343,7 +1346,23 @@ static void fan5405_external_power_changed(struct power_supply *psy)
 		dev_err(chip->dev,
 			"could not read USB current_max property, rc=%d\n", rc);
 	else
-		chip->set_ivbus_max = prop.intval / 1000;
+ {
+#ifdef CONFIG_FORCE_FAST_CHARGE
+    if(force_fast_charge == 1 || force_fast_charge == 2){
+	    chip->set_ivbus_max = fast_charge_level;
+	    pr_info("force fast charge = %d", force_fast_charge);
+	    pr_info("Fast charging is ON!!!\n");
+	   }
+	else if(force_fast_charge == 0){
+	    chip->set_ivbus_max = prop.intval / 1000;
+	    pr_info("force fast charge = %d", force_fast_charge);
+	    pr_info("Fast charging is OFF!!!\n");
+	   }
+    pr_info("Using fast charge level of %d",fast_charge_level);
+#else
+    chip->set_ivbus_max = prop.intval / 1000;
+#endif
+	}
 
 
 	rc = fan5405_set_ivbus_max(chip, chip->set_ivbus_max); //VBUS CURRENT
@@ -1413,10 +1432,14 @@ static int fan5405_parse_dt(struct fan5405_chip *chip)
 	if (rc < 0)
 		return -EINVAL;
 
+#ifdef CONFIG_FORCE_FAST_CHARGE
+	chip->chg_curr_max = fast_charge_level;
+#else
 	rc = of_property_read_u32(node, "yl,max-charge-current-mA", &chip->chg_curr_max);
 	if (rc < 0)
 		return -EINVAL;
 	chip->chg_curr_now = chip->chg_curr_max;
+#endif
 	
 	rc = of_property_read_u32(node, "yl,term-current-mA", &chip->iterm_ma);
 	if (rc < 0)
