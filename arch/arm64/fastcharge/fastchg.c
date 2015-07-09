@@ -31,8 +31,8 @@
 #define FAST_CHARGE_VERSION	"version 1.0 by Paul Reioux"
 
 int force_fast_charge; //disable by default
-int fast_charge_level = 1175;
-int usb_fast_charge_level = 900; //new usb fast charge level
+int fast_charge_level = 1250;
+int usb_fast_charge_level = 600; //new usb fast charge level
 
 /* sysfs interface for "force_fast_charge" */
 static ssize_t force_fast_charge_show(struct kobject *kobj,
@@ -96,12 +96,8 @@ static ssize_t usb_charge_level_store(struct kobject *kobj,
 	int new_usb_charge_level;
 
 	sscanf(buf, "%du", &new_usb_charge_level);
-	if(new_usb_charge_level >= 500 && new_usb_charge_level <=1000){
+	if(new_usb_charge_level >= 500 && new_usb_charge_level <=900){
 	    usb_fast_charge_level = new_usb_charge_level;
-	    return count;
-	}
-	else if (new_usb_charge_level > 1000 && new_usb_charge_level <= 1500){
-	    usb_fast_charge_level = 1000; // Dont go beyond 1500 if user tries to.
 	    return count;
 	}
 	else
