@@ -32,7 +32,6 @@
 #include "yl_pm8916_vbus.h"
 #ifdef CONFIG_FORCE_FAST_CHARGE
 #define IVBUS_FASTCHG_WARN 1250 /* uA */
-#define USB_FASTCHG_LOAD 1500 /* uA */
 #include <linux/fastchg.h>
 #endif
 
@@ -1351,22 +1350,14 @@ static void fan5405_external_power_changed(struct power_supply *psy)
  {
 #ifdef CONFIG_FORCE_FAST_CHARGE
 	if (force_fast_charge == 1 || force_fast_charge == 2){
-		if (fast_charge_level <= IVBUS_FASTCHG_LOAD)
-			if (fast_charge_level <= IVBUS_FASTCHG_WARN){
+		if (fast_charge_level <= IVBUS_FASTCHG_WARN){
 				chip->set_ivbus_max = fast_charge_level;
 				pr_info("Fast charging is ON!!!\n");
-			}
-			else if(fast_charge_level > IVBUS_FASTCHG_WARN){// Warn user about exceeding limit
+		}
+		else if(fast_charge_level > IVBUS_FASTCHG_WARN){// Warn user about exceeding limit
 				chip->set_ivbus_max = fast_charge_level;
 				pr_info("Warning: You exceeded the warning charge level!! \n");
 				pr_info("Fast charging is ON!!!\n");
-	   		}
-	   	}
-		else if(fast_charge_level > IVBUS_FASTCHG_LOAD)// Limit user when he exceeds the max IC limit
-			chip->set_ivbus_max = IVBUS_FASTCHG_WARN;
-			pr_info("You set fast charge level to high !! \n");
-			pr_info("Setting it to warning limit of 1250 mA!! \n");
-			pr_info("Fast charging is ON!!!\n");
 	   	}
 	}
 	else if(force_fast_charge == 0){

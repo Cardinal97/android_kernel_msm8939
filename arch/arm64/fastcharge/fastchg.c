@@ -29,6 +29,10 @@
 #include <linux/fastchg.h>
 
 #define FAST_CHARGE_VERSION	"version 1.0 by Paul Reioux"
+#define IVBUS_MIN_FAST_CHARGE_LEVEL 500 /* uA */
+#define IVBUS_MAX_FAST_CHARGE_LEVEL 1500 /* uA */
+#define USB_MIN_FAST_CHARGE_LEVEL 500 /* uA */
+#define USB_MAX_FAST_CHARGE_LEVEL 900 /* uA */
 
 int force_fast_charge; //disable by default
 int fast_charge_level = 1250;
@@ -74,12 +78,18 @@ static ssize_t charge_level_store(struct kobject *kobj,
 	int new_charge_level;
 
 	sscanf(buf, "%du", &new_charge_level);
-	if(new_charge_level >= 500 && new_charge_level <=1500){
+	if(new_charge_level >= IVBUS_MIN_FAST_CHARGE_LEVEL && new_charge_level <= IVBUS_MAX_FAST_CHARGE_LEVEL){
 	    fast_charge_level = new_charge_level;
 	    return count;
 	}
-	else
-	    return -EINVAL;
+	else if(new_charge_level < IVBUS_MIN_FAST_CHARGE_LEVEL){
+	    fast_charge_level = IVBUS_MIN_FAST_CHARGE_LEVEL;
+	    return count;
+	}
+	else if(new_charge_level > IVBUS_MAX_FAST_CHARGE_LEVEL){
+	    fast_charge_level = IVBUS_MAX_FAST_CHARGE_LEVEL;
+	    return count;
+	}
 }
 
 static ssize_t usb_charge_level_show(struct kobject *kobj,
@@ -96,19 +106,26 @@ static ssize_t usb_charge_level_store(struct kobject *kobj,
 	int new_usb_charge_level;
 
 	sscanf(buf, "%du", &new_usb_charge_level);
-	if(new_usb_charge_level >= 500 && new_usb_charge_level <=900){
+	if(new_usb_charge_level >= USB_MIN_FAST_CHARGE_LEVEL && new_usb_charge_level <= USB_MAX_FAST_CHARGE_LEVEL){
 	    usb_fast_charge_level = new_usb_charge_level;
 	    return count;
 	}
-	else
-	    return -EINVAL;
+	else if(new_usb_charge_level < USB_MIN_FAST_CHARGE_LEVEL){
+	    fast_charge_level = USB_MIN_FAST_CHARGE_LEVEL;
+	    return count;
+	}
+	else if(new_usb_charge_level > USB_MAX_FAST_CHARGE_LEVEL){
+	    fast_charge_level = USB_MAX_FAST_CHARGE_LEVEL;
+	    return count;
+	}	
 }
 
 /* sysfs interface for "fast_charge_levels" */
 static ssize_t available_charge_levels_show(struct kobject *kobj,
 			struct kobj_attribute *attr, char *buf)
 {
-	return sprintf(buf, "%s\n", FAST_CHARGE_LEVELS);
+	return sprintf(buf, "%s\n", IVBUS_FAST_CHARGE_LEVELS);
+	return sprintf(buf, "%s\n", USB_FAST_CHARGE_LEVELS);
 }
 
 /* sysfs interface for "version" */

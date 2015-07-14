@@ -25,6 +25,7 @@ extern int usb_fast_charge_level;
 #define FAST_CHARGE_DISABLED	0	/* default */
 #define FAST_CHARGE_ENABLED		1
 
-#define FAST_CHARGE_LEVELS	"Anything between range of 500 - 1500 mA (enter value in mA)"
+#define IVBUS_FAST_CHARGE_LEVELS	"For AC: Anything between range of 500 - 1500 mA (Caution: Exceed 1250mA at your own risk)"
+#define USB_FAST_CHARGE_LEVELS	"For USB: Anything between range of 500 - 900 mA"
 
 #endif
